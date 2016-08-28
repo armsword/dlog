@@ -1,0 +1,6 @@
+{
+    "log_path": "./log",
+    "log_prefix": "dlog",
+    "max_file_size": 100,
+    "async_flush": true
+}
