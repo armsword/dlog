@@ -14,7 +14,8 @@ private:
     Logger(const Logger &);
     Logger& operator=(const Logger &);
 public:
-
+    bool init();
+    
 private:
     DLOG_LOG_DECLARE();
 };
