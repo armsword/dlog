@@ -1,7 +1,7 @@
 #ifndef DLOG_LOOPTHREAD_H
 #define DLOG_LOOPTHREAD_H
 
-#include "common.h"
+#include "Common.h"
 #include "Thread.h"
 #include "Lock.h"
 

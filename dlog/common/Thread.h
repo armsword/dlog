@@ -1,7 +1,7 @@
 #ifndef DLOG_THREAD_H
 #define DLOG_THREAD_H
 
-#include "common.h"
+#include "Common.h"
 #include <pthread.h>
 #include <memory>
 #include <functional>

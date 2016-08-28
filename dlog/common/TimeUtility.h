@@ -1,7 +1,7 @@
 #ifndef DLOG_TIMEUTILITY_H
 #define DLOG_TIMEUTILITY_H
 
-#include "common.h"
+#include "Common.h"
 #include <sys/time.h>
 #include <string>
 

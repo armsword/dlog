@@ -2,7 +2,7 @@
 #define DLOG_CONFIGPARSER_H
 
 #include <dlog/common/Common.h>
-#include <json/json.h>
+#include <jsoncpp/json/json.h>
 
 DLOG_BEGIN_NAMESPACE(config);
 
