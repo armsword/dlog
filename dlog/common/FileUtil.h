@@ -19,7 +19,7 @@ private:
     
 };
 
-//DLOG_TYPEDEF_PTR(FileUtil);
+DLOG_TYPEDEF_PTR(FileUtil);
 
 DLOG_END_NAMESPACE(common);
 

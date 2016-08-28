@@ -1,4 +1,8 @@
 set(common_SRCS
+  TimeUtility.cpp
+  LoopThread.cpp
+  Lock.cpp
+  Thread.cpp
   FileUtil.cpp
   )
 

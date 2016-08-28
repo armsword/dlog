@@ -12,18 +12,22 @@ ConfigParser::~ConfigParser() {
 }
 
 ErrorCode ConfigParser::parse(const std::string &path) {
-    std::string defaultOutput = getDefaultOutput();
-    freopen(defaultOutput.c_str(), "w", stderr);
     Json::Reader reader;
     Json::Value root;
     std::string content;
     bool succ = common::FileUtil::readFileContent(path,content);
     if(!succ) {
-        fprintf(stderr, "open file[%s] error", path.c_str());
+        std::string defaultOutput = getDefaultOutput();
+        freopen(defaultOutput.c_str(), "w", stderr);
+        fprintf(stderr, "open file[%s] error! \n", path.c_str());
+        fclose(stderr);
         return ERROR_FILE_OPEN;
     }
     if(!reader.parse(content,root)) {
-        fprintf(stderr, "parse json file[%s] error", path.c_str());
+        std::string defaultOutput = getDefaultOutput();
+        freopen(defaultOutput.c_str(), "w", stderr);
+        fprintf(stderr, "parse json file[%s] error! \n", path.c_str());
+        fclose(stderr);
         return ERROR_JSON_PARSE;
     }
     _logPath = root["log_path"].asString();

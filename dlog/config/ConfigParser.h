@@ -29,7 +29,6 @@ private:
     std::string _logPrefix;
     uint32_t _maxFileSize;
     bool _asyncFlush;
-
 };
 
 DLOG_TYPEDEF_PTR(ConfigParser);
