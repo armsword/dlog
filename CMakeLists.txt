@@ -25,3 +25,4 @@ include_directories(${PROJECT_SOURCE_DIR})
 
 add_subdirectory(dlog/common)
 add_subdirectory(dlog/config)
+add_subdirectory(dlog/logger)

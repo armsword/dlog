@@ -1,7 +1,7 @@
 #include <dlog/config/ConfigParser.h>
 #include <dlog/common/FileUtil.h>
 #include <unistd.h>
-#include <sstream>
+#include <algorithm>
 
 DLOG_BEGIN_NAMESPACE(config);
 
@@ -17,23 +17,18 @@ ErrorCode ConfigParser::parse(const std::string &path) {
     std::string content;
     bool succ = common::FileUtil::readFileContent(path,content);
     if(!succ) {
-        std::string defaultOutput = getDefaultOutput();
-        freopen(defaultOutput.c_str(), "w", stderr);
-        fprintf(stderr, "open file[%s] error! \n", path.c_str());
-        fclose(stderr);
+        defaultOutput(path);
         return ERROR_FILE_OPEN;
     }
     if(!reader.parse(content,root)) {
-        std::string defaultOutput = getDefaultOutput();
-        freopen(defaultOutput.c_str(), "w", stderr);
-        fprintf(stderr, "parse json file[%s] error! \n", path.c_str());
-        fclose(stderr);
+        defaultOutput(path);
         return ERROR_JSON_PARSE;
     }
-    _logPath = root["log_path"].asString();
-    _logPrefix = root["log_prefix"].asString();
-    _maxFileSize = root["max_file_size"].asUInt();
-    _asyncFlush = root["async_flush"].asBool();
+    _logPath = root.get("log_path", ".").asString();
+    _logPrefix = root.get("log_prefix", "dlog").asString();
+    _logLevel = root.get("log_level", "DEBUG").asString();
+    _maxFileSize = root.get("max_file_size", 100).asUInt();
+    _asyncFlush = root.get("async_flush", true).asBool();
     return ERROR_NONE;
 }
 
@@ -53,11 +48,28 @@ bool ConfigParser::getAsyncFlush() const {
     return _asyncFlush;
 }
 
-const std::string ConfigParser::getDefaultOutput() const {
+LogLevel ConfigParser::getLogLevel() {
+    transform(_logLevel.begin(), _logLevel.end(), _logLevel.begin(), toupper);    
+    if(0 == _logLevel.compare("DEBUG")) {
+        return LOG_LEVEL_DEBUG;
+    } else if(0 == _logLevel.compare("INFO")) {
+        return LOG_LEVEL_INFO;
+    } else if(0 == _logLevel.compare("WARN")) {
+        return LOG_LEVEL_WARN;
+    } else if(0 == _logLevel.compare("ERROR")) {
+        return LOG_LEVEL_ERROR;
+    } else {
+        return LOG_LEVEL_DEBUG; // 如果出错，则默认级别为DEBUG
+    }
+}
+
+void ConfigParser::defaultOutput(const std::string &path) {
     std::stringstream pid;
     pid << getpid();
     std::string defaultOutput = std::string("stderr") + "." + pid.str();
-    return defaultOutput;
+    freopen(defaultOutput.c_str(), "w", stderr);
+    fprintf(stderr, "open path error, path is [%s] \n", path.c_str());
+    fclose(stderr);
 }
 
 DLOG_END_NAMESPACE(config);

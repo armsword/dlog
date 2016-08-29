@@ -3,6 +3,7 @@
 
 #include <dlog/common/Common.h>
 #include <jsoncpp/json/json.h>
+#include <sstream>
 
 DLOG_BEGIN_NAMESPACE(config);
 
@@ -20,13 +21,13 @@ public:
     const std::string& getLogPrefix() const;
     uint32_t getMaxFileSize() const;
     bool getAsyncFlush() const;
-
-private:
-    const std::string getDefaultOutput() const;
+    LogLevel getLogLevel();
+    static void defaultOutput(const std::string &path);
     
 private:
     std::string _logPath;
     std::string _logPrefix;
+    std::string _logLevel;
     uint32_t _maxFileSize;
     bool _asyncFlush;
 };
