@@ -29,9 +29,7 @@ typedef std::set<std::string> StringSet;
 #define INVALID_NODEPATH_COUNT (std::numeric_limits<uint32_t>::max())
 
 const static uint32_t DEFAULT_TIMEOUT = 10000;
-const static uint32_t DEFAULT_BUFFER_SIZE = 4 * 1024 * 1024; // 4M
-
-
+const static uint32_t DEFAULT_BUFFER_SIZE = 2 * 1024 * 1024; // 2M
 
 DLOG_NS_END;
 

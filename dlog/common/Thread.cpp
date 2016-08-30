@@ -38,7 +38,6 @@ ThreadPtr Thread::createThread(const std::function<void ()>& threadFunction)
         freopen(defaultOutput.c_str(), "w", stderr);
         fprintf(stderr, "Create thread error [%d] \n", rtn);
         fclose(stderr);
-        //UTIL_LOG(FATAL, "Create thread error [%d]", rtn);
     }
     
     return threadPtr;

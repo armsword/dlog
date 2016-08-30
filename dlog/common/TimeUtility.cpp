@@ -49,4 +49,14 @@ std::string TimeUtility::currentTimeString() {
     return std::string(str);
 }
 
+uint32_t TimeUtility::getCurTime(char cur[], int length) {
+    struct timeval t;
+    gettimeofday(&t, NULL);
+    struct tm tim;
+    ::localtime_r(&t.tv_sec, &tim);
+    return snprintf(cur, length, "%04d-%02d-%02d %02d:%02d:%02d.%03d",
+                    tim.tm_year + 1900, tim.tm_mon + 1, tim.tm_mday,
+                    tim.tm_hour, tim.tm_min, tim.tm_sec, (int)t.tv_usec / 1000);
+}
+
 DLOG_END_NAMESPACE(common);

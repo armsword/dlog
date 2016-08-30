@@ -21,6 +21,7 @@ public:
         return usecond / 1000;
     }
     static std::string currentTimeString();
+    static uint32_t getCurTime(char cur[], int length);
 };
 
 class ScopedTime {

@@ -21,6 +21,9 @@
 #include <memory>
 #define DLOG_TYPEDEF_PTR(x) typedef std::shared_ptr<x> x##Ptr
 
+#define likely(x) __builtin_expect((x), 1)
+#define unlikely(x) __builtin_expect((x), 0)
+
 #include <dlog/common/CommonDefine.h>
 
 #endif /*DLOG_COMMON_H_*/

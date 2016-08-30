@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <sys/stat.h>
+#include <stdarg.h>
 
 DLOG_BEGIN_NAMESPACE(logger);
 using namespace config;
@@ -42,6 +43,41 @@ bool Logger::init() {
     return true;
 }
 
+void Logger::log(LogLevel level, const char * file, uint32_t line, 
+                 const char * func, char* format, ...) 
+{
+    char *buffer = _buffer;
+    uint32_t logLen = 0;
+    uint32_t headLen  = prepareLogHead(buffer, file, line, func);
+    va_list ap;
+    va_start(ap, format);
+    logLen = vsnprintf(buffer, DEFAULT_BUFFER_SIZE - headLen, format, ap);
+    va_end(ap);
+    if(likely(_fd != NULL)) {
+        dump(headLen + logLen);
+    }
+}
+
+void Logger::dump(uint32_t len) {
+    if(likely(access(_logLocation.c_str(), W_OK))) {
+        if(fwrite(_buffer, len, 1, _fd) == 1) {
+            *_buffer = '\0';  //重置buffer
+        } else {
+            std::stringstream pid;
+            pid << getpid();
+            std::string defaultOutput = std::string("stderr") + "." + pid.str();
+            freopen(defaultOutput.c_str(), "w", stderr);
+            fprintf(stderr, "create loop thread failed! \n");
+            fclose(stderr);
+        }
+    } else {
+        // 判断文件是否存在，loop里做
+    }
+}
+
+LogLevel Logger::getLogLevel() const {
+    return _logLevel;
+}
 
 const char* Logger::logLevelToString(LogLevel level) const {
     switch(level) {
@@ -125,6 +161,17 @@ uint32_t Logger::getLogBlockSize() const {
         return fileSize;
     }
     return logStat.st_size;
+}
+
+uint32_t Logger::prepareLogHead(char *buffer, const char* file,
+                                uint32_t line, const char *func) const {
+    buffer[0] = '[';
+    uint32_t timeOffset = common::TimeUtility::getCurTime(buffer + 1, DEFAULT_BUFFER_SIZE);
+    buffer[timeOffset + 1] = ']';
+    uint32_t len = timeOffset + 2;
+    return snprintf(buffer + len, DEFAULT_BUFFER_SIZE - len, " [%s] [%d] [%s:%d] [%s] ",
+                    logLevelToString(_logLevel), (int)pthread_self(), file, line, func);
+
 }
 
 void Logger::close(FILE *fd) {

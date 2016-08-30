@@ -19,6 +19,9 @@ private:
     Logger& operator=(const Logger &);
 public:
     bool init();
+    void log(LogLevel level, const char * file, uint32_t line, 
+             const char * func, char* format, ...);
+    LogLevel getLogLevel() const;
 
 private:
     const char* logLevelToString(LogLevel level) const;
@@ -28,8 +31,11 @@ private:
     bool createLoopThread();
     void checkFile();
     uint32_t getLogBlockSize() const;
-    void close(FILE *fd);
-
+    uint32_t prepareLogHead(char *buffer, const char* file, 
+                            uint32_t line, const char *func) const;
+    void close(FILE *fd);    
+    void dump(uint32_t len);
+    
 private:
     FILE *_fd;
     LogLevel _logLevel;
