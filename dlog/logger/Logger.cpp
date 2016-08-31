@@ -10,7 +10,12 @@ DLOG_BEGIN_NAMESPACE(logger);
 using namespace config;
 using namespace common;
 
-Logger::Logger() : _fd(NULL), _logLevel(LOG_LEVEL_DEBUG), _logBlockid(0)
+Logger::Logger() : 
+    _fd(NULL), 
+    _changeFd(NULL),
+    _logLevel(LOG_LEVEL_DEBUG), 
+    _logBlockid(0),
+    _needChangeFd(false)
 { 
 }
 
@@ -59,20 +64,32 @@ void Logger::log(LogLevel level, const char * file, uint32_t line,
 }
 
 void Logger::dump(uint32_t len) {
-    if(likely(access(_logLocation.c_str(), W_OK))) {
-        if(fwrite(_buffer, len, 1, _fd) == 1) {
-            *_buffer = '\0';  //重置buffer
+    if(likely(access(_logLocation.c_str(), W_OK) == 0)) {
+        if(likely(_needChangeFd == false)) {
+            if(fwrite(_buffer, len, 1, _fd) == 1) {
+                *_buffer = '\0';  //重置buffer
+            } 
+            else {
+                std::stringstream pid;
+                pid << getpid();
+                std::string defaultOutput = std::string("stderr") + "." + pid.str();
+                freopen(defaultOutput.c_str(), "w", stderr);
+                fprintf(stderr, "create loop thread failed! \n");
+                fclose(stderr);
+            }
         } else {
-            std::stringstream pid;
-            pid << getpid();
-            std::string defaultOutput = std::string("stderr") + "." + pid.str();
-            freopen(defaultOutput.c_str(), "w", stderr);
-            fprintf(stderr, "create loop thread failed! \n");
-            fclose(stderr);
+            {
+                ScopedLock lock(_lock);
+                FILE *tempFd = NULL;
+                tempFd = _fd;
+                _fd = _changeFd;
+                _changeFd = tempFd;
+                _needChangeFd = false;
+                setBufferFormat(_asyncFlush);
+            }
         }
-    } else {
-        // 判断文件是否存在，loop里做
     }
+
 }
 
 LogLevel Logger::getLogLevel() const {
@@ -142,15 +159,14 @@ void Logger::checkFile() {
         logBlockid << _logBlockid;
         _logLocation = _logPath + _logPrefix + ".log." + 
                        common::TimeUtility::currentTimeString() + logBlockid.str();
-        FILE *newfd = fopen(_logLocation.c_str(), "a");
-        FILE *oldfd = NULL;
-        {
-            ScopedLock lock(_lock);
-            oldfd = _fd;
-            _fd = newfd;
-            setBufferFormat(_asyncFlush);
+        _changeFd = fopen(_logLocation.c_str(), "a");
+        _needChangeFd = true;
+        
+        if(!_needChangeFd) {
+            if(_changeFd != NULL) {
+                close(_changeFd);
+            }
         }
-        close(oldfd);
     }
 }
 

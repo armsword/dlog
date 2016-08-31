@@ -38,6 +38,7 @@ private:
     
 private:
     FILE *_fd;
+    FILE *_changeFd;
     LogLevel _logLevel;
     uint32_t _maxFileSize;
     std::string _logLocation;
@@ -45,6 +46,7 @@ private:
     bool _asyncFlush;
     std::string _logPath;
     std::string _logPrefix;
+    bool _needChangeFd;
     common::ThreadMutex _lock;
     common::LoopThreadPtr _checkThreadPtr;
     static __thread char _buffer[DEFAULT_BUFFER_SIZE];
