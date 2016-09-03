@@ -2,9 +2,9 @@
 #define DLOG_LOG_H
 
 #include <dlog/common/Common.h>
-#include <dlog/common/Logger.h>
+#include <dlog/logger/Logger.h>
 
-extern dlog::Logger logger;
+static dlog::logger::Logger logger;
 
 #define DLOG_INIT()                             \
     do {                                        \
@@ -13,8 +13,11 @@ extern dlog::Logger logger;
 
 #define DLOG_LOG(level, format, args...)                                \
     do {                                                                \
-        logger.log(dlog::LOG_LEVEL_##level, __FILE__, __LINE__, __FUNCTION__, \
-                   format, ##args);                                     \
+        if(logger.getLogLevel() <= dlog::LOG_LEVEL_##level)            \
+        {                                                               \
+            logger.log(dlog::LOG_LEVEL_##level, __FILE__, __LINE__,     \
+                       __FUNCTION__,format, ##args);                    \
+        }                                                               \
     } while(0)
 
 #endif //DLOG_LOG_H

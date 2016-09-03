@@ -18,8 +18,8 @@
 
 #define DLOG_ALIAS_NAMESAPCE(x, y) namespace dlog { namespace x = y; }
 
-#include <memory>
-#define DLOG_TYPEDEF_PTR(x) typedef std::shared_ptr<x> x##Ptr
+#include <tr1/memory>
+#define DLOG_TYPEDEF_PTR(x) typedef std::tr1::shared_ptr<x> x##Ptr
 
 #define likely(x) __builtin_expect((x), 1)
 #define unlikely(x) __builtin_expect((x), 0)

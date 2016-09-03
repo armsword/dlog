@@ -8,7 +8,7 @@
 DLOG_BEGIN_NAMESPACE(common);
 
 class LoopThread;
-typedef std::shared_ptr<LoopThread> LoopThreadPtr;
+typedef std::tr1::shared_ptr<LoopThread> LoopThreadPtr;
 
 class LoopThread
 {
@@ -23,7 +23,7 @@ public:
     void stop();
 public:
     // if create loop thread fail, return null LoopThreadPtr
-    static LoopThreadPtr createLoopThread(const std::function<void ()> &loopFunction, int64_t loopInterval /*us*/);
+    static LoopThreadPtr createLoopThread(const std::tr1::function<void ()> &loopFunction, int64_t loopInterval /*us*/);
     void runOnce();
 private:
     void loop();
@@ -31,7 +31,7 @@ private:
     volatile bool _run;
     ThreadCond _cond;
     ThreadPtr _threadPtr;
-    std::function<void ()> _loopFunction;
+    std::tr1::function<void ()> _loopFunction;
     int64_t _loopInterval;
     int64_t _nextTime;
 };

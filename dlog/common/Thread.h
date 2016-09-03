@@ -3,21 +3,21 @@
 
 #include "Common.h"
 #include <pthread.h>
-#include <memory>
-#include <functional>
+#include <tr1/memory>
+#include <tr1/functional>
 #include <cassert>
 
 DLOG_BEGIN_NAMESPACE(common);
 
 class Thread;
-typedef std::shared_ptr<Thread> ThreadPtr;
+typedef std::tr1::shared_ptr<Thread> ThreadPtr;
 
 class Thread 
 {
 public:
     // when create thread fail, return null ThreadPtr
     // need hold return value else will hang to the created thread terminate
-    static ThreadPtr createThread(const std::function<void ()>& threadFunction);
+    static ThreadPtr createThread(const std::tr1::function<void ()>& threadFunction);
 private:
     static void* threadWrapperFunction(void* arg);
 public:

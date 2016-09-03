@@ -16,7 +16,7 @@ LoopThread::~LoopThread() {
     stop();
 }
 
-LoopThreadPtr LoopThread::createLoopThread(const std::function<void ()> &loopFunction, int64_t loopInterval /*us*/) 
+LoopThreadPtr LoopThread::createLoopThread(const std::tr1::function<void ()> &loopFunction, int64_t loopInterval /*us*/) 
 {
     LoopThreadPtr ret(new LoopThread);
     

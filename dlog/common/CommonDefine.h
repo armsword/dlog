@@ -5,6 +5,7 @@
 #include <set>
 #include <vector>
 #include <limits>
+#include <stdint.h>
 
 DLOG_NS_BEGIN;
 

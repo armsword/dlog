@@ -9,7 +9,9 @@
 DLOG_BEGIN_NAMESPACE(logger);
 using namespace config;
 using namespace common;
+const static std::string DEFAULT_JSON_STRING = "dlog.json"; 
 
+__thread char Logger::_buffer[DEFAULT_BUFFER_SIZE];
 Logger::Logger() : 
     _fd(NULL), 
     _changeFd(NULL),
@@ -25,14 +27,16 @@ Logger::~Logger() {
 
 bool Logger::init() {
     ConfigParser parser;
+    parser.parse(DEFAULT_JSON_STRING);
     _logPath = parser.getLogPath();
     _logPrefix = parser.getLogPrefix();
+    _logLevel = parser.getLogLevel();
     _asyncFlush = parser.getAsyncFlush();
     _maxFileSize = parser.getMaxFileSize();
     if(!createDir(_logPath)) {
         return false;
     }
-    if(!openFile(_logPath, _logPrefix)) {
+    if(!openFile()) {
         return false;
     }
     setBufferFormat(_asyncFlush);
@@ -49,17 +53,22 @@ bool Logger::init() {
 }
 
 void Logger::log(LogLevel level, const char * file, uint32_t line, 
-                 const char * func, char* format, ...) 
+                 const char * func, const char* format, ...) 
 {
     char *buffer = _buffer;
     uint32_t logLen = 0;
-    uint32_t headLen  = prepareLogHead(buffer, file, line, func);
+    uint32_t totalLen = 0;
+    uint32_t headLen  = prepareLogHead(buffer, file, line, func, level);
+    
     va_list ap;
     va_start(ap, format);
-    logLen = vsnprintf(buffer, DEFAULT_BUFFER_SIZE - headLen, format, ap);
+    logLen = vsnprintf(buffer + headLen, DEFAULT_BUFFER_SIZE - headLen, format, ap);
     va_end(ap);
+    totalLen = headLen + logLen;
+    buffer[totalLen] = '\n';
+    buffer[totalLen + 1] = '\0';
     if(likely(_fd != NULL)) {
-        dump(headLen + logLen);
+        dump(totalLen + 1);
     }
 }
 
@@ -121,11 +130,11 @@ bool Logger::createDir(const std::string& logPath) const {
     return true;
 }
 
-bool Logger::openFile(const std::string &logPath, const std::string &logPrefix)
+bool Logger::openFile()
 {
     std::stringstream logBlockid;
     logBlockid << _logBlockid;
-    _logLocation = logPath + logPrefix + ".log." + 
+    _logLocation = _logPath + '/' + _logPrefix + ".log." + 
                    common::TimeUtility::currentTimeString() + logBlockid.str();
     _fd = fopen(_logLocation.c_str(), "a");
     if(_fd == NULL) {
@@ -146,7 +155,7 @@ void Logger::setBufferFormat(bool asyncFlush) {
 
 bool Logger::createLoopThread() {
     _checkThreadPtr = LoopThread::createLoopThread(
-            std::bind(&Logger::checkFile, this),
+            std::tr1::bind(&Logger::checkFile, this),
             DEFAULT_CHECK_INTERVAL);
     return _checkThreadPtr != NULL;
 }
@@ -157,7 +166,7 @@ void Logger::checkFile() {
         _logBlockid += 1;
         std::stringstream logBlockid;
         logBlockid << _logBlockid;
-        _logLocation = _logPath + _logPrefix + ".log." + 
+        _logLocation = _logPath + '/' + _logPrefix + ".log." + 
                        common::TimeUtility::currentTimeString() + logBlockid.str();
         _changeFd = fopen(_logLocation.c_str(), "a");
         _needChangeFd = true;
@@ -179,14 +188,14 @@ uint32_t Logger::getLogBlockSize() const {
     return logStat.st_size;
 }
 
-uint32_t Logger::prepareLogHead(char *buffer, const char* file,
-                                uint32_t line, const char *func) const {
+uint32_t Logger::prepareLogHead(char *buffer, const char* file, uint32_t line, 
+                                const char *func, LogLevel level) const {
     buffer[0] = '[';
     uint32_t timeOffset = common::TimeUtility::getCurTime(buffer + 1, DEFAULT_BUFFER_SIZE);
     buffer[timeOffset + 1] = ']';
     uint32_t len = timeOffset + 2;
-    return snprintf(buffer + len, DEFAULT_BUFFER_SIZE - len, " [%s] [%d] [%s:%d] [%s] ",
-                    logLevelToString(_logLevel), (int)pthread_self(), file, line, func);
+    return len + snprintf(buffer + len, DEFAULT_BUFFER_SIZE - len, " [%s] [%u] [%s:%d] [%s] ",
+                          logLevelToString(level), (int)pthread_self(), file, line, func);
 
 }
 

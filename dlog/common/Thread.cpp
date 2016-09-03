@@ -9,7 +9,7 @@ DLOG_BEGIN_NAMESPACE(common);
 
 struct ThreadFunctionWrapperArg
 {
-    std::function<void ()> threadFunction;
+    std::tr1::function<void ()> threadFunction;
 };
 
 void* Thread::threadWrapperFunction(void* arg)
@@ -19,7 +19,7 @@ void* Thread::threadWrapperFunction(void* arg)
     return NULL;
 }
 
-ThreadPtr Thread::createThread(const std::function<void ()>& threadFunction)
+ThreadPtr Thread::createThread(const std::tr1::function<void ()>& threadFunction)
 {
     ThreadPtr threadPtr(new Thread);
     ThreadFunctionWrapperArg* arg = new ThreadFunctionWrapperArg;

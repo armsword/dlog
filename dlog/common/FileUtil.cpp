@@ -12,7 +12,7 @@ FileUtil::~FileUtil() {
 
 bool FileUtil::readFileContent(const std::string &filePath, std::string &content) {
     std::ifstream fileContent(filePath);
-    if(fileContent) {
+    if(!fileContent) {
         return false;
     }
     std::ostringstream buffer;

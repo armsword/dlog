@@ -15,6 +15,7 @@ public:
 private:
     ConfigParser(const ConfigParser &);
     ConfigParser& operator=(const ConfigParser &);
+
 public:
     ErrorCode parse(const std::string &path);
     const std::string& getLogPath() const;

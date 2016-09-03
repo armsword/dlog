@@ -14,25 +14,28 @@ public:
     ~Logger();
 public:
     const static uint32_t DEFAULT_CHECK_INTERVAL = 500 * 1000; // 500 ms
+
 private:
     Logger(const Logger &);
     Logger& operator=(const Logger &);
+
 public:
     bool init();
     void log(LogLevel level, const char * file, uint32_t line, 
-             const char * func, char* format, ...);
+             const char * func, const char* format, ...);
     LogLevel getLogLevel() const;
 
 private:
     const char* logLevelToString(LogLevel level) const;
+    LogLevel stringToLogLevel(const std::string &logLevel) const;
     bool createDir(const std::string &logPath) const;
-    bool openFile(const std::string &logPath, const std::string &logPrefix);
+    bool openFile();
     void setBufferFormat(bool asyncFlush);
     bool createLoopThread();
     void checkFile();
     uint32_t getLogBlockSize() const;
-    uint32_t prepareLogHead(char *buffer, const char* file, 
-                            uint32_t line, const char *func) const;
+    uint32_t prepareLogHead(char *buffer, const char* file, uint32_t line, 
+                            const char *func, LogLevel level) const;
     void close(FILE *fd);    
     void dump(uint32_t len);
     

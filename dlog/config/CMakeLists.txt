@@ -8,4 +8,5 @@ install(TARGETS dlog_config DESTINATION lib)
 
 file(GLOB HEADERS "*.h")
 install(FILES ${HEADERS} DESTINATION include/dlog/config)
-TARGET_LINK_LIBRARIES(dlog_config cppjson)
+target_link_libraries(dlog_config jsoncpp)
+target_link_libraries(dlog_config dlog_common)
