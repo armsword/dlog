@@ -28,3 +28,4 @@ add_subdirectory(dlog/config)
 add_subdirectory(dlog/logger)
 
 add_subdirectory(example)
+add_subdirectory(perf_test)

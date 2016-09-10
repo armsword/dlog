@@ -38,7 +38,8 @@ private:
                             const char *func, LogLevel level) const;
     void close(FILE *fd);    
     void dump(uint32_t len);
-    
+    void print(const std::string &output);
+
 private:
     FILE *_fd;
     FILE *_changeFd;

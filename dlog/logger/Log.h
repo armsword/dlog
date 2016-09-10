@@ -4,18 +4,29 @@
 #include <dlog/common/Common.h>
 #include <dlog/logger/Logger.h>
 
-static dlog::logger::Logger logger;
+//static dlog::logger::Logger logger;
+struct Log {
+    Log() {
+        logger.init();
+    }
+    dlog::logger::Logger logger;
+};
+
+inline dlog::logger::Logger& getLogInstance() {
+    static Log logInstance;
+    return logInstance.logger;
+}
 
 #define DLOG_INIT()                             \
     do {                                        \
-        logger.init();                          \
+        getLogInstance();                       \
     } while(0)
 
 #define DLOG_LOG(level, format, args...)                                \
     do {                                                                \
-        if(logger.getLogLevel() <= dlog::LOG_LEVEL_##level)            \
+        if(getLogInstance().getLogLevel() <= dlog::LOG_LEVEL_##level)   \
         {                                                               \
-            logger.log(dlog::LOG_LEVEL_##level, __FILE__, __LINE__,     \
+            getLogInstance().log(dlog::LOG_LEVEL_##level, __FILE__, __LINE__, \
                        __FUNCTION__,format, ##args);                    \
         }                                                               \
     } while(0)

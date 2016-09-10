@@ -9,13 +9,14 @@
 DLOG_BEGIN_NAMESPACE(logger);
 using namespace config;
 using namespace common;
-const static std::string DEFAULT_JSON_STRING = "dlog.json"; 
-
+const static std::string DEFAULT_JSON_STRING = "dlog.json";
 __thread char Logger::_buffer[DEFAULT_BUFFER_SIZE];
+
 Logger::Logger() : 
     _fd(NULL), 
     _changeFd(NULL),
     _logLevel(LOG_LEVEL_DEBUG), 
+    _logLocation(""),
     _logBlockid(0),
     _needChangeFd(false)
 { 
@@ -26,6 +27,10 @@ Logger::~Logger() {
 }
 
 bool Logger::init() {
+    if(likely(access(_logLocation.c_str(), W_OK) == 0)) { 
+        print("the log has init once, you do not need init twice! \n");
+        return true;   //避免多次初始化
+    }
     ConfigParser parser;
     parser.parse(DEFAULT_JSON_STRING);
     _logPath = parser.getLogPath();
@@ -41,12 +46,7 @@ bool Logger::init() {
     }
     setBufferFormat(_asyncFlush);
     if(!createLoopThread()) {
-        std::stringstream pid;
-        pid << getpid();
-        std::string defaultOutput = std::string("stderr") + "." + pid.str();
-        freopen(defaultOutput.c_str(), "w", stderr);
-        fprintf(stderr, "create loop thread failed! \n");
-        fclose(stderr);
+        print("create loop thread failed! \n");
         return false;
     }
     return true;
@@ -79,12 +79,7 @@ void Logger::dump(uint32_t len) {
                 *_buffer = '\0';  //重置buffer
             } 
             else {
-                std::stringstream pid;
-                pid << getpid();
-                std::string defaultOutput = std::string("stderr") + "." + pid.str();
-                freopen(defaultOutput.c_str(), "w", stderr);
-                fprintf(stderr, "create loop thread failed! \n");
-                fclose(stderr);
+                print("create loop thread failed! \n");
             }
         } else {
             {
@@ -135,7 +130,7 @@ bool Logger::openFile()
     std::stringstream logBlockid;
     logBlockid << _logBlockid;
     _logLocation = _logPath + '/' + _logPrefix + ".log." + 
-                   common::TimeUtility::currentTimeString() + logBlockid.str();
+                   common::TimeUtility::currentTimeString() + '.' + logBlockid.str();
     _fd = fopen(_logLocation.c_str(), "a");
     if(_fd == NULL) {
         config::ConfigParser::defaultOutput(_logLocation);
@@ -167,7 +162,7 @@ void Logger::checkFile() {
         std::stringstream logBlockid;
         logBlockid << _logBlockid;
         _logLocation = _logPath + '/' + _logPrefix + ".log." + 
-                       common::TimeUtility::currentTimeString() + logBlockid.str();
+                       common::TimeUtility::currentTimeString() + '.' + logBlockid.str();
         _changeFd = fopen(_logLocation.c_str(), "a");
         _needChangeFd = true;
         
@@ -197,6 +192,15 @@ uint32_t Logger::prepareLogHead(char *buffer, const char* file, uint32_t line,
     return len + snprintf(buffer + len, DEFAULT_BUFFER_SIZE - len, " [%s] [%u] [%s:%d] [%s] ",
                           logLevelToString(level), (int)pthread_self(), file, line, func);
 
+}
+
+void Logger::print(const std::string &output) {
+    std::stringstream pid;
+    pid << getpid();
+    std::string defaultOutput = std::string("stderr") + "." + pid.str();
+    freopen(defaultOutput.c_str(), "w", stderr);
+    fprintf(stderr, output.c_str());
+    fclose(stderr);
 }
 
 void Logger::close(FILE *fd) {

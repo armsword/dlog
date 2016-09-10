@@ -2,6 +2,6 @@
     "log_path": "./log",
     "log_prefix": "dlog",
     "log_level": "DEBUG",
-    "max_file_size": 100,
+    "max_file_size": 200,
     "async_flush": true
 }
