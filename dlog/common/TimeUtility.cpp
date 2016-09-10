@@ -49,6 +49,15 @@ std::string TimeUtility::currentTimeString() {
     return std::string(str);
 }
 
+std::string TimeUtility::currentDay() {
+    time_t lt = time(NULL);
+    struct tm tim;
+    localtime_r(&lt, &tim);
+    char str[200];
+    strftime(str, sizeof(str), "%Y%m%d", &tim);
+    return std::string(str);
+}
+
 uint32_t TimeUtility::getCurTime(char cur[], int length) {
     struct timeval t;
     gettimeofday(&t, NULL);

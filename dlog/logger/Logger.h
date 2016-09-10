@@ -50,6 +50,7 @@ private:
     bool _asyncFlush;
     std::string _logPath;
     std::string _logPrefix;
+    std::string _currentDay;
     bool _needChangeFd;
     common::ThreadMutex _lock;
     common::LoopThreadPtr _checkThreadPtr;

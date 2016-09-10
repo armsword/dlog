@@ -84,12 +84,14 @@ void Logger::dump(uint32_t len) {
         } else {
             {
                 ScopedLock lock(_lock);
-                FILE *tempFd = NULL;
-                tempFd = _fd;
-                _fd = _changeFd;
-                _changeFd = tempFd;
-                _needChangeFd = false;
-                setBufferFormat(_asyncFlush);
+                if(_needChangeFd) {   // 需要多一次判断，否则2个线程都走到临界区时，交换fd会出现bug
+                    FILE *tempFd = NULL;
+                    tempFd = _fd;
+                    _fd = _changeFd;
+                    _changeFd = tempFd;
+                    _needChangeFd = false;
+                    setBufferFormat(_asyncFlush);
+                }
             }
         }
     }
@@ -128,9 +130,10 @@ bool Logger::createDir(const std::string& logPath) const {
 bool Logger::openFile()
 {
     std::stringstream logBlockid;
+    _currentDay = common::TimeUtility::currentDay();
     logBlockid << _logBlockid;
     _logLocation = _logPath + '/' + _logPrefix + ".log." + 
-                   common::TimeUtility::currentTimeString() + '.' + logBlockid.str();
+                   _currentDay + '.' + logBlockid.str();
     _fd = fopen(_logLocation.c_str(), "a");
     if(_fd == NULL) {
         config::ConfigParser::defaultOutput(_logLocation);
@@ -157,13 +160,18 @@ bool Logger::createLoopThread() {
 
 void Logger::checkFile() {
     uint32_t fileSize = getLogBlockSize();
-    if(fileSize >= _maxFileSize * 1024 * 1024) {   
+    if(fileSize >= _maxFileSize * 1024 * 1024 || 
+       _currentDay != common::TimeUtility::currentDay()) 
+    {   
         _logBlockid += 1;
         std::stringstream logBlockid;
         logBlockid << _logBlockid;
         _logLocation = _logPath + '/' + _logPrefix + ".log." + 
-                       common::TimeUtility::currentTimeString() + '.' + logBlockid.str();
+                       common::TimeUtility::currentDay() + '.' + logBlockid.str();
         _changeFd = fopen(_logLocation.c_str(), "a");
+        if(_changeFd == NULL) {
+            print("open new file error!\n"); 
+        }
         _needChangeFd = true;
         
         if(!_needChangeFd) {
