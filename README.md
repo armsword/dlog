@@ -1,10 +1,10 @@
-# DLog
+## dlog
 
-### 关于
-dlog是一个线程安全、高性能的C++日志库。此日志库主要为了满足我日常造轮子需求以及学习交流之用，如果你寻找轻量级的C++ 日志库时，dlog也许满足你的需求。
+### 简介
+dlog是一个线程安全、高性能的C++日志库。此日志库主要为了满足我日常造轮子需求以及学习交流之用，如果你需要一个轻量级的C++日志库时，dlog 也许可以满足你的需求。
 
 ### 编译
-执行build.sh，在上层目录里会生成build文件，测试的可执行文件在release/bin目录下。
+执行build.sh，在上层目录里会生成build文件夹，测试的可执行文件在release/bin目录下。
 
 ### 使用方法
 将etc文件下的dlog.json扔到可执行文件的当前目录（当然只要能让可执行文件找到dlog.json即可），每个函数包含logger文件夹下的Log.h头文件，在主函数里调用DLOG_INIT初始化一次，之后在每个需要打印log的文件里调用DLOG_LOG即可。
@@ -21,7 +21,7 @@ int main() {
     DLOG_LOG(WARN, "test the log level using log lib!");
     DLOG_LOG(DEBUG, "Hello World, %d",2016);
     DLOG_LOG(INFO, "test Log C/C++ lib");
-    DLOG_LOG(ERROR, "Hello everyone, this is my blog: http://armsword.com/; Welcome to visit it,Thankyou!");
+    DLOG_LOG(ERROR, "Hello everyone, this is my blog: http://armsword.com/; Welcome to visit it,Thank you!");
 
     return 0;
 }
@@ -29,6 +29,7 @@ int main() {
 ```
 ### 输出样例
 目录名：dlog.log.20160911.0
+
 日志内容：
 
 ```
@@ -36,7 +37,7 @@ int main() {
 [2016-09-11 15:05:30.510] [WARN] [4246443808] [/home/Github/dlog/example/LogTest.cpp:8] [main] test the log level using log lib!
 [2016-09-11 15:05:30.510] [DEBUG] [4246443808] [/home/Github/dlog/example/LogTest.cpp:9] [main] Hello World, 2016
 [2016-09-11 15:05:30.510] [INFO] [4246443808] [/home/Github/dlog/example/LogTest.cpp:10] [main] test Log C/C++ lib
-[2016-09-11 15:05:30.510] [ERROR] [4246443808] [/home/Github/dlog/example/LogTest.cpp:11] [main] Hello everyone, this is my blog: http://armsword.com/; Welcome to visit,Thank you!
+[2016-09-11 15:05:30.510] [ERROR] [4246443808] [/home/Github/dlog/example/LogTest.cpp:11] [main] Hello everyone, this is my blog: http://armsword.com/; Welcome to visit it,Thank you!
 
 ```
 ### 该日志库功能
