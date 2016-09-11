@@ -22,7 +22,7 @@ int main() {
     for(i = 0; i < 255; i++) {
         buffer[i] = 'A' + rand() % 26;
     }
-    buffer[++i] = '\0';
+    buffer[i] = '\0';
 
     int64_t begin = currentTime();
     for(int i = 0; i < 10000000; i++) {
