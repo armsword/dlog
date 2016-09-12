@@ -73,7 +73,7 @@ time dd if=/dev/zero of=test.dbf bs=8k count=300000 oflag=direct
 
 注：oflag=direct 表示使用DirectIO方式，不使用文件系统的buffer等
 ```
-而我用dlog写入3.5G（1000W条数据），用时大约61、62s，计算下来，写速度大约58M/s，与上面测试的磁盘io数据64.6 MB/s比起来，性能还算不错，当然由于时间问题，我测试还不够充分，以后有机会继续优化下再测试看下。
+而我用dlog写入3.5G（1000W条数据），用时大约51、52s，计算下来，写速度大约69M/s，与上面测试的磁盘io数据64.6 MB/s比起来，性能还算不错（因为cache问题，要比裸写磁盘性能要好），当然由于时间问题，我测试还不够充分，以后有机会继续优化下再测试看下。
 
 [一些性能优化方法](http://armsword.com/2016/09/10/a-high-performace-and-thread-safe-cpp-log-lib/)
 
