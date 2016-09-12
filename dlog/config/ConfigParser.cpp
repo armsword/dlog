@@ -17,12 +17,10 @@ ErrorCode ConfigParser::parse(const std::string &path) {
     std::string content;
     bool succ = common::FileUtil::readFileContent(path,content);
     if(!succ) {
-        std::cout << "open error!" << std::endl;
         defaultOutput(path);
         return ERROR_FILE_OPEN;
     }
     if(!reader.parse(content,root)) {
-        std::cout << "parse error!" << std::endl;
         defaultOutput(path);
         return ERROR_JSON_PARSE;
     }
