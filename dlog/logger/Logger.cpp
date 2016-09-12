@@ -78,7 +78,7 @@ void Logger::dump(uint32_t len) {
             *_buffer = '\0';  //重置buffer
         } 
         else {
-            print("create loop thread failed! \n");
+            print("dump buffer to disk failed! \n");
         }
     } else {
         {
