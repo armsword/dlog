@@ -44,7 +44,7 @@ private:
     FILE *_fd;
     FILE *_changeFd;
     LogLevel _logLevel;
-    uint32_t _maxFileSize;
+    uint64_t _maxFileSize;
     std::string _logLocation;
     uint32_t _logBlockid;
     bool _asyncFlush;

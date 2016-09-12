@@ -73,29 +73,28 @@ void Logger::log(LogLevel level, const char * file, uint32_t line,
 }
 
 void Logger::dump(uint32_t len) {
-    if(likely(access(_logLocation.c_str(), W_OK) == 0)) {
-        if(likely(_needChangeFd == false)) {
-            if(fwrite(_buffer, len, 1, _fd) == 1) {
-                *_buffer = '\0';  //重置buffer
-            } 
-            else {
-                print("create loop thread failed! \n");
-            }
-        } else {
-            {
-                ScopedLock lock(_lock);
-                if(_needChangeFd) {   // 需要多一次判断，否则2个线程都走到临界区时，交换fd会出现bug
-                    FILE *tempFd = NULL;
-                    tempFd = _fd;
-                    _fd = _changeFd;
-                    _changeFd = tempFd;
-                    _needChangeFd = false;
-                    setBufferFormat(_asyncFlush);
-                }
+    if(likely(_needChangeFd == false)) {
+        if(fwrite(_buffer, len, 1, _fd) == 1) {
+            *_buffer = '\0';  //重置buffer
+        } 
+        else {
+            print("create loop thread failed! \n");
+        }
+    } else {
+        {
+            ScopedLock lock(_lock);
+            if(_needChangeFd) {   // 需要多一次判断，否则2个线程都走到临界区时，交换fd会出现bug
+                FILE *tempFd = NULL;
+                tempFd = _fd;
+                _fd = _changeFd;
+                _changeFd = tempFd;
+                _needChangeFd = false;
+                fwrite(_buffer, len, 1, _changeFd);
+                fflush(_changeFd);
+                setBufferFormat(_asyncFlush);
             }
         }
     }
-
 }
 
 LogLevel Logger::getLogLevel() const {
@@ -159,7 +158,7 @@ bool Logger::createLoopThread() {
 }
 
 void Logger::checkFile() {
-    uint32_t fileSize = getLogBlockSize();
+    uint64_t fileSize = getLogBlockSize();
     if(fileSize >= _maxFileSize * 1024 * 1024 || 
        _currentDay != common::TimeUtility::currentDay()) 
     {   
@@ -183,7 +182,7 @@ void Logger::checkFile() {
 }
 
 uint32_t Logger::getLogBlockSize() const {
-    uint32_t fileSize = 0;
+    uint64_t fileSize = 0;
     struct stat logStat;
     if(stat(_logLocation.c_str(), &logStat)) {
         return fileSize;
