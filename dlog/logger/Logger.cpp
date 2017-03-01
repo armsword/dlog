@@ -27,7 +27,7 @@ Logger::~Logger() {
 }
 
 bool Logger::init() {
-    if(likely(access(_logLocation.c_str(), W_OK) == 0)) { 
+    if (likely(access(_logLocation.c_str(), W_OK) == 0)) { 
         print("the log has init once, you do not need init twice! \n");
         return true;   //避免多次初始化
     }
@@ -38,14 +38,14 @@ bool Logger::init() {
     _logLevel = parser.getLogLevel();
     _asyncFlush = parser.getAsyncFlush();
     _maxFileSize = parser.getMaxFileSize();
-    if(!createDir(_logPath)) {
+    if (!createDir(_logPath)) {
         return false;
     }
-    if(!openFile()) {
+    if (!openFile()) {
         return false;
     }
     setBufferFormat(_asyncFlush);
-    if(!createLoopThread()) {
+    if (!createLoopThread()) {
         print("create loop thread failed! \n");
         return false;
     }
@@ -67,14 +67,14 @@ void Logger::log(LogLevel level, const char * file, uint32_t line,
     totalLen = headLen + logLen;
     buffer[totalLen] = '\n';
     buffer[totalLen + 1] = '\0';
-    if(likely(_fd != NULL)) {
+    if (likely(_fd != NULL)) {
         dump(totalLen + 1);
     }
 }
 
 void Logger::dump(uint32_t len) {
-    if(likely(_needChangeFd == false)) {
-        if(fwrite(_buffer, len, 1, _fd) == 1) {
+    if (likely(_needChangeFd == false)) {
+        if (fwrite(_buffer, len, 1, _fd) == 1) {
             *_buffer = '\0';  //重置buffer
         } 
         else {
@@ -83,7 +83,7 @@ void Logger::dump(uint32_t len) {
     } else {
         {
             ScopedLock lock(_lock);
-            if(_needChangeFd) {   // 需要多一次判断，否则2个线程都走到临界区时，交换fd会出现bug
+            if (_needChangeFd) {   // 需要多一次判断，否则2个线程都走到临界区时，交换fd会出现bug
                 FILE *tempFd = NULL;
                 tempFd = _fd;
                 _fd = _changeFd;
@@ -117,7 +117,7 @@ const char* Logger::logLevelToString(LogLevel level) const {
 }
 
 bool Logger::createDir(const std::string& logPath) const {
-    if(access(logPath.c_str(), F_OK) == -1) {
+    if (access(logPath.c_str(), F_OK) == -1) {
         if(mkdir(logPath.c_str(), 0755) < 0) {
             config::ConfigParser::defaultOutput(logPath);
             return false;
@@ -134,7 +134,7 @@ bool Logger::openFile()
     _logLocation = _logPath + '/' + _logPrefix + ".log." + 
                    _currentDay + '.' + logBlockid.str();
     _fd = fopen(_logLocation.c_str(), "a");
-    if(_fd == NULL) {
+    if (_fd == NULL) {
         config::ConfigParser::defaultOutput(_logLocation);
         return false;
     }
@@ -143,7 +143,7 @@ bool Logger::openFile()
 
 void Logger::setBufferFormat(bool asyncFlush) {
     // asyncFlush为true时设置行缓冲，否则无缓冲
-    if(asyncFlush) {
+    if (asyncFlush) {
         setvbuf(_fd, NULL, _IOLBF, 0);
     } else {
         setvbuf(_fd, NULL, _IONBF, 0);
@@ -159,7 +159,7 @@ bool Logger::createLoopThread() {
 
 void Logger::checkFile() {
     uint64_t fileSize = getLogBlockSize();
-    if(fileSize >= _maxFileSize * 1024 * 1024 || 
+    if (fileSize >= _maxFileSize * 1024 * 1024 || 
        _currentDay != common::TimeUtility::currentDay()) 
     {   
         _logBlockid += 1;
@@ -168,12 +168,12 @@ void Logger::checkFile() {
         _logLocation = _logPath + '/' + _logPrefix + ".log." + 
                        common::TimeUtility::currentDay() + '.' + logBlockid.str();
         _changeFd = fopen(_logLocation.c_str(), "a");
-        if(_changeFd == NULL) {
+        if (_changeFd == NULL) {
             print("open new file error!\n"); 
         }
         _needChangeFd = true;
         
-        if(!_needChangeFd) {
+        if (!_needChangeFd) {
             if(_changeFd != NULL) {
                 close(_changeFd);
             }
@@ -184,7 +184,7 @@ void Logger::checkFile() {
 uint32_t Logger::getLogBlockSize() const {
     uint64_t fileSize = 0;
     struct stat logStat;
-    if(stat(_logLocation.c_str(), &logStat)) {
+    if (stat(_logLocation.c_str(), &logStat)) {
         return fileSize;
     }
     return logStat.st_size;
@@ -211,7 +211,7 @@ void Logger::print(const std::string &output) {
 }
 
 void Logger::close(FILE *fd) {
-    if(fd != NULL) {
+    if (fd != NULL) {
         fflush(fd);  
         fclose(fd);
     }

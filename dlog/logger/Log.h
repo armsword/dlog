@@ -24,7 +24,7 @@ inline dlog::logger::Logger& getLogInstance() {
 
 #define DLOG_LOG(level, format, args...)                                \
     do {                                                                \
-        if(getLogInstance().getLogLevel() <= dlog::LOG_LEVEL_##level)   \
+        if (getLogInstance().getLogLevel() <= dlog::LOG_LEVEL_##level)   \
         {                                                               \
             getLogInstance().log(dlog::LOG_LEVEL_##level, __FILE__, __LINE__, \
                        __FUNCTION__,format, ##args);                    \
